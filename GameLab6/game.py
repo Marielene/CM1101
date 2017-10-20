@@ -4,6 +4,8 @@ from map import rooms
 from player import *
 from items import *
 from gameparser import *
+global currentmass
+currentmass=3
 
 
 
@@ -248,16 +250,25 @@ def execute_take(item_id):
     "You cannot take that."
     """
     global current_room
-    
-    if not item_id:
-        print("You cannot take that.")
-        return
-    
-    for item in current_room["items"]:
-        if item["id"] == item_id:
-            inventory.append(item)
-            break
+    global currentmass
 
+    if(currentmass>=3):
+        print(" You are carrying too much weight.")
+        return
+    else:
+        if not item_id:
+            print("You cannot take that.")
+            return
+        for item in current_room["items"]:
+            if item["id"] == item_id:
+                if(currentmass+item["mass"]>=3):
+                    print("You cannot take this as it will be above max weight.(3kg)")
+                    return
+                else:
+                    inventory.append(item)
+                    currentmass+=item["mass"]
+                    break
+        
     current_room["items"].remove(inventory[-1])
 
     
@@ -268,6 +279,7 @@ def execute_drop(item_id):
     no such item in the inventory, this function prints "You cannot drop that."
     """
     global current_room
+    global currentmass
 
     if not item_id:
         print("You cannot drop that.")
@@ -276,6 +288,7 @@ def execute_drop(item_id):
     for item in inventory:
         if item_id == item["id"]:
             current_room["items"].append(item)
+            currentmass=currentmass-item["mass"]
             break
 
     inventory.remove(current_room["items"][-1])
@@ -370,7 +383,7 @@ def main():
         # Execute the player's command
         execute_command(command)
         
-        if len(rooms["Reception"]["items"]) == 6:
+        if len(rooms["Admins"]["items"]) == 6:
             print("GG WP! You won the game, boye!")
             break
             
